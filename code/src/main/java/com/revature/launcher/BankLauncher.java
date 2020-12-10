@@ -1,15 +1,13 @@
 package com.revature.launcher;
 
-import java.util.Scanner;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.revature.menu.ShapeMenu;
-import com.revature.repositories.ShapeDAO;
-import com.revature.repositories.ShapeMemoryDAO;
-import com.revature.services.ShapeService;
-import com.revature.services.ShapeServiceImplementation;
+import com.revature.menu.BankMenu;
+import com.revature.repositories.BankAccountDAO;
+import com.revature.repositories.BankAccountMemoryDAO;
+import com.revature.services.BankAccountService;
+import com.revature.services.BankAccountServiceImplementation;
 
 public class BankLauncher {
 	
@@ -34,18 +32,10 @@ public class BankLauncher {
 	public static void main(String[] args) {
 		e720Logger.info("The server has started.");
 		
-		Scanner s=new Scanner(System.in);
+		BankAccountDAO bdao = new BankAccountMemoryDAO();
+		BankAccountService bad = new BankAccountServiceImplementation(bdao);
+		BankMenu bmen = new BankMenu(bad);
 		
-		System.out.println("Enter your username:");
-	    String username = s.nextLine();  // Read user input
-	    
-	    System.out.println("Enter your password:");
-	    String password = s.nextLine(); // Read user input
-	    
-	    e720Logger.info(username + " has logged in.");
-	    System.out.println("Login successful. Welcome " + username);
-	    
-	    s.close();
-		}
-
+		bmen.loginPrompt();
+	}
 }
