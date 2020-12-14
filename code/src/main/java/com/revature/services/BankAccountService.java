@@ -1,33 +1,33 @@
 package com.revature.services;
 
+import java.util.List;
+
+import com.revature.models.BankAccount;
+import com.revature.models.MoneyTransfer;
 import com.revature.models.UserAccount;
 
 public interface BankAccountService {
 	
-	public void createCustomerAccount(String username, String password);
+	public void createBankAccount(BankAccount b);
 	
-	public void login(String username, String password);
+	public double checkBalance(int accountId);
 	
-	public void createBankAccount();
+	public void updateAccount(int accountId);
 	
-	public double checkBalance();
+	public double makeDeposit(int accountId,double amount);
 	
-	public double makeDeposit(double amount);
+	public double makeWithdrawal(int accountId,double amount);
 	
-	public double makeWithdrawal(double amount);
+	public void createMoneyTransfer(MoneyTransfer mt);
 	
-	public void approveAccount();
+	public List<MoneyTransfer> getAllMoneyTransfers();
 	
-	public void rejectAccount();
+	public List<MoneyTransfer> getAccountMoneyTransfers(BankAccount target);
 	
-	public void viewAllAccounts();
+	public void resolveMoneyTransfer(int id);
+
+	List<BankAccount> viewAllCustomerAccounts(UserAccount target);
 	
-	public void viewAllCustomerAccounts(UserAccount target);
-	
-	public void createMoneyTransfer(UserAccount origin, UserAccount target);
-	
-	public void viewTransactionLog();
-	
-	void rejectInvalidTransaction();
+	public BankAccount getBankAccountById(int id);
 
 }

@@ -1,13 +1,20 @@
 package com.revature.launcher;
 
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.revature.menu.BankMenu;
+import com.revature.models.BankAccount;
 import com.revature.repositories.BankAccountDAO;
-import com.revature.repositories.BankAccountMemoryDAO;
+import com.revature.repositories.BankAccountPostgresDAO;
+import com.revature.repositories.UserAccountDAO;
+import com.revature.repositories.UserAccountPostgresDAO;
 import com.revature.services.BankAccountService;
 import com.revature.services.BankAccountServiceImplementation;
+import com.revature.services.UserAccountService;
+import com.revature.services.UserAccountServiceImplementation;
 
 public class BankLauncher {
 	
@@ -32,10 +39,21 @@ public class BankLauncher {
 	public static void main(String[] args) {
 		e720Logger.info("The server has started.");
 		
-		BankAccountDAO bdao = new BankAccountMemoryDAO();
-		BankAccountService bad = new BankAccountServiceImplementation(bdao);
-		BankMenu bmen = new BankMenu(bad);
+		UserAccountDAO uad = new UserAccountPostgresDAO();
+		UserAccountService uas = new UserAccountServiceImplementation(uad);
 		
-		bmen.loginPrompt();
+		BankAccountDAO bad = new BankAccountPostgresDAO();
+		BankAccountService bas = new BankAccountServiceImplementation(bad);
+		
+		
+		BankMenu bmen = new BankMenu(bas,uas);
+		
+		//adao.saveNewLoginInfo("xgardener", "fairy");
+		//System.out.println(login_info.get("tbrennan"));
+		
+		bmen.beginMenuLoop();
+		
+		
+		
 	}
 }

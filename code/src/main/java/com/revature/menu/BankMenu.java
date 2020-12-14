@@ -1,21 +1,50 @@
 package com.revature.menu;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
+import com.revature.models.BankAccount;
+import com.revature.models.MoneyTransfer;
+import com.revature.models.UserAccount;
 import com.revature.services.BankAccountService;
+import com.revature.services.UserAccountService;
 
 public class BankMenu {
 	
-	Scanner userIn = new Scanner(System.in);;
+	private int mode = 0;
+	UserAccount activeUser = null;
 	
+	Scanner userIn = new Scanner(System.in);
+	UserAccountService uas;
 	BankAccountService bas;
 	
-	public BankMenu(BankAccountService bas) {
+	public BankMenu(BankAccountService bas, UserAccountService uas) {
 		super();
 		this.bas = bas;
+		this.uas = uas;
 	}
 	
-	public void loginPrompt() {
+	public void beginMenuLoop() {
+		//beginning of loop
+		while(true) {
+			if(activeUser != null) mode = 1;
+			else mode = 0;
+			
+			
+			if(mode == 0) {
+				activeUser = loginPrompt();
+			}
+			else if(mode == 1) {
+				userAccountDashboard();
+			}
+			
+			
+		}
+		//end of loop
+	}
+	
+	public UserAccount loginPrompt() {
 		
 		/*
 		As a user, I can login.
@@ -28,7 +57,7 @@ public class BankMenu {
 		System.out.println("Please enter your password:");
 		String password = manageUserInput();
 		
-		bas.login(username,password);
+		return uas.login(username,password);
 	}
 	
 	public void userAccountDashboard() {
@@ -37,12 +66,35 @@ public class BankMenu {
 		3 points
 		 */
 		
-		System.out.println("You haven't registered your customer account yet.");
-		System.out.println("To register as a customer and start banking with ThinkBank, enter <customer>.");
-		System.out.println("To register as an employee, enter <employee>. This will require approval from"
-				+ " an existing employee.");
+		String userInput;
 		
-		String employeeOrCustomer = manageUserInput();
+		if(activeUser == null) {
+			mode = 0;
+			return;
+		}
+		else if(activeUser.getType() == UserAccount.NONE) {
+			System.out.println("You haven't registered your customer account yet.");
+			System.out.println("To register as a customer and start banking with ThinkBank, enter <customer>.");
+//			System.out.println("To register as an employee, enter <employee>. This will require approval from"
+//					+ " an existing employee.");
+			
+			userInput = manageUserInput();
+			if(userInput.equals("customer")){
+				activeUser.setType(UserAccount.CUSTOMER);
+				uas.updateUserInfo(activeUser);
+			}
+//			else if(userInput.equals("employee")) {
+//				activeUser.setType(UserAccount.EMPLOYEE);
+//				uas.updateUserInfo(activeUser);
+//				System.out.println("Please wait for another employee to verify your account.");
+//			}
+		}
+		else if(activeUser.getType() == (UserAccount.CUSTOMER)) {
+			customerAccountDashboard();
+		}
+		else if(activeUser.getType() == (UserAccount.EMPLOYEE)) {
+			employeeAccountDashboard();
+		}
 	}
 	
 	public void customerAccountDashboard() {
@@ -61,37 +113,113 @@ public class BankMenu {
 		 */
 		
 		System.out.println("Welcome to the Customer Account Dashboard.");
+		System.out.println("Your User ID is # " + activeUser.getUserId());
 		
-		boolean customerHasBankAccount = false;
+		System.out.println("To make a new bank account, enter <new> followed by the desired starting balance.");
+		System.out.println("Any starting balance other than 0 will require approval by an employee.");
 		
-		if(customerHasBankAccount) {
+		List<BankAccount> customerAccounts = bas.viewAllCustomerAccounts(activeUser);
+		List<MoneyTransfer> customerTransfers = new ArrayList<MoneyTransfer>();
+		
+		if(customerAccounts.size() != 0) {
 			System.out.println("Here is a list of your active bank accounts:");
+			for(BankAccount b : customerAccounts) {
+				System.out.println(b.display());
+				List<MoneyTransfer> tList = bas.getAccountMoneyTransfers(b);
+				
+				for(MoneyTransfer m : tList) {
+					if(m.getSum() != 0) {
+						System.out.println("Money Transfer: " + m.display());
+						customerTransfers.add(m);
+					}
+				}
+			}
+			System.out.println("To make a transaction, enter one of the following commands:");
+			System.out.println("To make a withdrawal, enter <withdraw> followed by the account id followed by the sum.");
+			System.out.println("To make a deposit, enter <deposit> followed by the account id followed by the sum.");
+			System.out.println("To make a money transfer to another account, enter <transfer>, followed by the id"
+					+ "\n" + "of the originating account, followed by the sum, followed by the id of the target"
+					+ "\n" +"account.");
+			System.out.println("To accept all money transfers, enter <accept>.");
+			System.out.println("To accept a single money transfer, enter <accept> followed by the id"
+					+ "\n" + "of the transfer.");
 		}
 		else {
-			System.out.println("You have no active bank accounts:");
+			System.out.println("You have no active bank accounts.");
 		}
-		
-		boolean customerHasPendingMoneyTransfer = false;
-		
-		if(customerHasPendingMoneyTransfer) {
-			System.out.println("Here is a list of your pending money transfers:");
-		}
-		else {
-			System.out.println("You have no pending money transfers:");
-		}
-		
-		System.out.println("To make a transaction, enter one of the following commands:");
-		System.out.println("To make a withdrawal, enter <withdraw> followed by the sum.");
-		System.out.println("To make a deposit, enter <deposit> followed by the sum.");
-		System.out.println("To accept all money transfers, enter <accept>.");
-		System.out.println("To accept a single money transfer, enter <accept> followed by the id"
-				+ " of the transfer.");
-		System.out.println("To make a money transfer to another account, enter <transfer>, followed by the id"
-				+ " of the originating account, followed by the sum, followed by the id of the target account.");
 		
 		//I may want to break that last one up to simplify
 		
 		String command = manageUserInput();
+		
+		String[] splitCommand = command.split("\\s+");
+		
+		 if(splitCommand.length == 1) {
+			 if(splitCommand[0].equals("accept")) {
+				 for(MoneyTransfer m : customerTransfers) {
+					 
+					 double sum = m.getOrigin().withdraw(m.getSum());
+					 bas.makeWithdrawal(m.getOrigin().getAccountId(), sum);
+					 bas.makeDeposit(m.getTarget().getAccountId(), sum);
+					
+					 bas.resolveMoneyTransfer(m.getId());
+				}
+				 System.out.println("Accepted all transfers.");
+			 }
+		 }
+		 else if(splitCommand.length == 2) {
+			 if(splitCommand[0].equals("accept")) {
+				 int val = Integer.parseInt((splitCommand[1]));
+				 for(MoneyTransfer m : customerTransfers) {
+					 if(m.getId() == val) {
+						 double sum = m.getOrigin().withdraw(m.getSum());
+						 bas.makeWithdrawal(m.getOrigin().getAccountId(), sum);
+						 bas.makeDeposit(m.getTarget().getAccountId(), sum);
+						
+						 bas.resolveMoneyTransfer(m.getId());
+					 }
+				 }
+				 System.out.println("Accepted money transfer " + val);
+			 }
+			 else if(splitCommand[0].equals("new")) {
+				 double val = Double.parseDouble((splitCommand[1]));
+				 BankAccount b = new BankAccount(activeUser.getUserId(), val);
+				 bas.createBankAccount(b);
+				 System.out.println("Created account with starting balance $" + val);
+			 }
+		 }
+			 else if(splitCommand.length == 3) {
+				 double val = Double.parseDouble((splitCommand[2]));
+				 int id = Integer.parseInt((splitCommand[1]));
+				 
+				 if(splitCommand[0].equals("withdraw")) {
+					 System.out.println("Withdrew $" + val);
+					 bas.makeWithdrawal(id, val);
+				 }
+				 else if(splitCommand[0].equals("deposit")) {
+					 System.out.println("Deposited $" + val);
+					 bas.makeDeposit(id, val);
+				 }
+			 }
+		 else if(splitCommand.length == 4) {
+			 if(splitCommand[0].equals("transfer")) {
+				 int origin = Integer.parseInt(splitCommand[1]);
+				 double sum = Double.parseDouble(splitCommand[2]);
+				 int target = Integer.parseInt(splitCommand[3]);
+				 
+				 BankAccount originAcc = bas.getBankAccountById(origin);
+				 BankAccount targetAcc = bas.getBankAccountById(target);
+				 
+				 bas.createMoneyTransfer(new MoneyTransfer(originAcc,targetAcc,sum));
+				 
+				 System.out.println("Transferring $" + sum + " from account" 
+				 + origin + " to account " + target);
+			 }
+		 }
+		 
+		 
+		 
+		 //end of dashboard
 	}
 	
 	public void employeeAccountDashboard() {
@@ -103,6 +231,72 @@ public class BankMenu {
 		A an employee, I can view a log of all transactions.
 		2 points
 		 */
+		
+		System.out.println("Enter one of the following commands:");
+		System.out.println("To approve all accounts, enter <approve>:");
+		System.out.println("To approve a single account, enter <approve> followed by the id of the account:");
+		System.out.println("To view a customer's bank accounts, enter <view> followed by the customer's"
+				+ " id:");
+		System.out.println("To view the transaction log, enter <log>:");
+		
+		//approval
+		
+		List<BankAccount> unverifiedAccounts = new ArrayList<BankAccount>();
+		
+		List<UserAccount> ca = uas.viewAllUserAccounts();
+		
+		for(UserAccount u : ca) {
+			List<BankAccount> ba = bas.viewAllCustomerAccounts(u);
+			for(BankAccount b : ba) {
+				if(!b.isVerified()) unverifiedAccounts.add(b);
+			}
+		}
+		
+		if(unverifiedAccounts.size() > 0) {
+			System.out.println("The following accounts must be verified:");
+			for(BankAccount b : unverifiedAccounts) {
+				System.out.println(b.display());
+			}
+		}
+		
+		//user input
+		
+		String command = manageUserInput();
+		
+		String[] splitCommand = command.split("\\s+");
+		
+		
+		if(splitCommand.length == 1) {
+			 if(splitCommand[0].equals("approve")) {
+				 for(BankAccount b : unverifiedAccounts) {
+					 b.setVerified(true);
+					bas.updateAccount(b.getAccountId());
+				}
+				 System.out.println("Approved all accounts.");
+			 }
+		 }
+		 else if(splitCommand.length == 2) {
+			 if(splitCommand[0].equals("view")) {
+					int id = Integer.parseInt(splitCommand[1]);
+					List<BankAccount> l = bas.viewAllCustomerAccounts(uas.getUserById(id));
+					
+					for(int i =0;i<l.size();i++) {
+						System.out.println(l.get(i).display());
+					}
+				}
+			 else if(splitCommand[0].equals("approve")) {
+				 int id = Integer.parseInt(splitCommand[1]);
+				 bas.getBankAccountById(id);
+				 bas.updateAccount(id);
+				 System.out.println("Approved accounts#" + id);
+			 }
+		 }
+		
+		
+		
+		
+		
+		//see all accounts
 		
 		boolean eventsAwaitApproval = false;
 		
@@ -117,14 +311,6 @@ public class BankMenu {
 			System.out.println("No accounts require your approval.");
 		}
 		
-		System.out.println("Enter one of the following commands:");
-		System.out.println("To approve all accounts, enter <approve all>:");
-		System.out.println("To approve a single account, enter <approve> followed by the id of the account:");
-		System.out.println("To view a customer's bank accounts, enter <view> followed by the customer's"
-				+ " id:");
-		System.out.println("To view the transaction log, enter <log>:");
-		
-		String command = manageUserInput();
 	}
 	
 	private String manageUserInput() {

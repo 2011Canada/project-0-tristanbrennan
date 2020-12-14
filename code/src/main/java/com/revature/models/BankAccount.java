@@ -1,42 +1,51 @@
 package com.revature.models;
 
-import java.util.List;
-import java.util.ArrayList;
+public class BankAccount implements Displayable {
 
-public class BankAccount {
-	
-	private static List<BankAccount> all_accounts = new ArrayList<BankAccount>();
-	private static int lowest_unused_id_num = 0;
-
-	private int id_num;
+	private int accountId;
+	private int ownerId;
 	private double balance;
+	private boolean verified;
 
-	public BankAccount(double starting_balance) {
+	public BankAccount(int ownerId, double balance) {
 		super();
+
+		this.ownerId = ownerId;
+		this.balance = balance;
 		
-		this.balance = starting_balance;
-		
-		//Set the user's id number automatically.
-		id_num = lowest_unused_id_num;
-		//Increment the counter so that id number can never be used again.
-		lowest_unused_id_num++;
-		
-		//Add this account to the list of all BankAccounts.
-		all_accounts.add(this);
+		if(balance == 0) this.verified = true;
+		else this.verified = false;
 	}
 	
-	public BankAccount() {
-		this(0);
+	public BankAccount(int ownerId) {
+		this(ownerId,0);
+		
 	}
 	
-	public double Withdraw(double amount) {
+	public BankAccount(int ownerId, double balance, int accountId, boolean verified) {
+		this.ownerId = ownerId;
+		this.balance = balance;
+		this.verified = verified;
+		this.accountId = accountId;
+	}
+	
+	@Override
+	public String display() {
+		String v;
+		if(verified) v = "verified";
+		else v = "unverified";
+		
+		return "" + accountId + ", " + balance + ", " + v;
+	}
+	
+	public double withdraw(double amount) {
 		/*
 		 * Attempts to withdraw money from the account. If there isn't enough, withdraws as much as
 		 * possible. Returns the amount that was actually withdrawn, which may be less than the desired
 		 * amount.
 		 */
 		
-		if(amount >= balance) {
+		if(amount <= balance) {
 			balance = balance - amount;
 			return amount;
 		}
@@ -46,21 +55,33 @@ public class BankAccount {
 			return max_withdrawal;
 		}
 	}
+	
+	public double deposit(double amount) {
+		balance = balance + amount;
+		
+		return balance;
+	}
 
 	public double getBalance() {
 		return balance;
 	}
 
-	public void setBalance(double balance) {
-		this.balance = balance;
+	public int getOwnerId() {
+		return ownerId;
+	}
+	
+	public int getAccountId() {
+		return accountId;
 	}
 
-	public int getId_num() {
-		return id_num;
+	public boolean isVerified() {
+		return verified;
 	}
 
-	public static List<BankAccount> getAllAccounts() {
-		return all_accounts;
+	public void setVerified(boolean verified) {
+		this.verified = verified;
 	}
+
+	
 
 }

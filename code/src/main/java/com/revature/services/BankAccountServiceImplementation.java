@@ -1,18 +1,27 @@
 package com.revature.services;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.revature.models.BankAccount;
+import com.revature.models.MoneyTransfer;
 import com.revature.models.UserAccount;
 import com.revature.repositories.BankAccountDAO;
+import com.revature.repositories.UserAccountDAO;
 
 public class BankAccountServiceImplementation implements BankAccountService {
 	
 	static Logger e720Logger = LogManager.getLogger("com.revature.e720");
 	
-	BankAccountDAO bad; //this is what I'll use to implement the methods
+	BankAccountDAO ad; //this is what I'll use to implement the methods
 	
-	public BankAccountServiceImplementation(BankAccountDAO bad) {
+	public BankAccountServiceImplementation(BankAccountDAO ad) {
 		/*
 		As the system, I reject invalid transactions.
 		Ex:
@@ -20,85 +29,118 @@ public class BankAccountServiceImplementation implements BankAccountService {
 		A deposit or withdrawal of negative money.
 		2 points
 		 */
-		this.bad = bad;	
+		this.ad = ad;	
 	}
 
 	@Override
-	public void createCustomerAccount(String username, String password) {
-		// TODO Auto-generated method stub
+	public void createBankAccount(BankAccount b) {
+		ad.createNewBankAccount(b);
+	}
+
+	@Override
+	public double checkBalance(int accountId) {
+		List<BankAccount> allAccounts = ad.getAllBankAccounts();
 		
-	}
-
-	@Override
-	public void login(String username, String password) {
-		//check login credentials
+		for(BankAccount b : allAccounts) {
+			if(b.getAccountId() == accountId) return b.getBalance();
+		}
 		
-		e720Logger.info(username + " logged in.");
-	}
-
-	@Override
-	public void createBankAccount() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public double checkBalance() {
-		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public double makeDeposit(double amount) {
-		// TODO Auto-generated method stub
+	public double makeDeposit(int accountId, double amount) {
+		List<BankAccount> allAccounts = ad.getAllBankAccounts();
+		
+		for(BankAccount b : allAccounts) {
+			if(b.getAccountId() == accountId) {
+				b.deposit(b.getBalance() + amount);
+				ad.updateBankAccountInfo(b);
+				return b.getBalance();
+			}
+		}
+		
 		return 0;
 	}
 
 	@Override
-	public double makeWithdrawal(double amount) {
-		// TODO Auto-generated method stub
+	public double makeWithdrawal(int accountId, double amount) {
+		List<BankAccount> allAccounts = ad.getAllBankAccounts();
+		
+		for(BankAccount b : allAccounts) {
+			if(b.getAccountId() == accountId) {
+				double result = b.withdraw(b.getBalance() + amount);
+				ad.updateBankAccountInfo(b);
+				return result;
+				/*
+				 * This may not allow you to withdraw the full amount, depending on your
+				 * balance.
+				 */
+			}
+		}
+		
 		return 0;
 	}
 
 	@Override
-	public void approveAccount() {
-		// TODO Auto-generated method stub
+	public List<BankAccount> viewAllCustomerAccounts(UserAccount target) {
+		List<BankAccount> bankList = ad.getAllBankAccounts();
+		List<BankAccount> resultList = new ArrayList<BankAccount>();
 		
+		for(BankAccount b : bankList) {
+//			System.out.println("Found account belonging to user # " + b.getOwnerId());
+			if(b.getOwnerId() == target.getUserId()) {
+				resultList.add(b);
+			}
+		}
+		
+		return resultList;
 	}
 
 	@Override
-	public void rejectAccount() {
-		// TODO Auto-generated method stub
-		
+	public void createMoneyTransfer(MoneyTransfer mt) {
+		ad.createMoneyTransfer(mt);
 	}
 
 	@Override
-	public void viewAllAccounts() {
-		// TODO Auto-generated method stub
-		
+	public List<MoneyTransfer> getAllMoneyTransfers() {
+		return ad.getAllMoneyTransfers();
 	}
 
 	@Override
-	public void viewAllCustomerAccounts(UserAccount target) {
-		// TODO Auto-generated method stub
+	public List<MoneyTransfer> getAccountMoneyTransfers(BankAccount target) {
+		List<MoneyTransfer> bankList = ad.getAllMoneyTransfers();
+		List<MoneyTransfer> resultList = new ArrayList<MoneyTransfer>();
 		
+		for(MoneyTransfer b : bankList) {
+//			System.out.println("Found account belonging to user # " + b.getOwnerId());
+			if(b.getTarget().getAccountId() == target.getAccountId()) {
+				resultList.add(b);
+			}
+		}
+		
+		return resultList;
 	}
 
 	@Override
-	public void createMoneyTransfer(UserAccount origin, UserAccount target) {
-		// TODO Auto-generated method stub
-		
+	public BankAccount getBankAccountById(int id) {
+		return ad.getAccountByIdNumber(id);
 	}
 
 	@Override
-	public void viewTransactionLog() {
-		// TODO Auto-generated method stub
-		
+	public void resolveMoneyTransfer(int id) {
+		ad.resolveMoneyTransfer(id);
 	}
 
 	@Override
-	public void rejectInvalidTransaction() {
-		// TODO Auto-generated method stub
+	public void updateAccount(int accountId) {
+		List<BankAccount> allAccounts = ad.getAllBankAccounts();
+		
+		for(BankAccount b : allAccounts) {
+			if(b.getAccountId() == accountId) {
+				ad.updateBankAccountInfo(b);
+			}
+		}
 		
 	}
 
