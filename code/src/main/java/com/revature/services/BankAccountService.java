@@ -12,8 +12,6 @@ public interface BankAccountService {
 	
 	public double checkBalance(int accountId);
 	
-	public void updateAccount(int accountId);
-	
 	public double makeDeposit(int accountId,double amount);
 	
 	public double makeWithdrawal(int accountId,double amount);
@@ -29,5 +27,7 @@ public interface BankAccountService {
 	List<BankAccount> viewAllCustomerAccounts(UserAccount target);
 	
 	public BankAccount getBankAccountById(int id);
+
+	void updateAccount(BankAccount b);
 
 }

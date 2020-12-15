@@ -1,2 +1,9 @@
-2020-12-14 18:39:24 e720 [INFO] The server has started.
-2020-12-14 18:39:30 e720 [INFO] admin logged in.
+2020-12-15 17:55:24 e720 [INFO] The server has started.
+2020-12-15 17:55:33 e720 [INFO] u logged in.
+2020-12-15 17:56:01 e720 [INFO] Deposited $50.0 into account#3
+2020-12-15 17:56:06 e720 [INFO] Withdrew $50.0 from account#3
+2020-12-15 17:56:36 e720 [INFO] Deposited $50.0 into account#3
+2020-12-15 17:56:40 e720 [INFO] New money transfer from User#com.revature.models.BankAccount@68b6f0d6 to User#com.revature.models.BankAccount@4044fb95 of amount $50.0
+2020-12-15 17:56:51 e720 [INFO] Withdrew $50.0 from account#3
+2020-12-15 17:56:51 e720 [INFO] Deposited $50.0 into account#2
+2020-12-15 17:57:12 e720 [INFO] admin logged in.

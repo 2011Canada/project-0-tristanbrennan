@@ -68,11 +68,11 @@ public class BankAccountPostgresDAO extends AbstractPostgresDAO implements BankA
 				+ " where \"account_id\" = ?" + "returning \"account_id\";";
 		
 		try {
-			PreparedStatement new_user = conn.prepareStatement(sql2);
-			new_user.setBoolean(1, b.isVerified());
-			new_user.setInt(2, b.getAccountId());
+			PreparedStatement verify = conn.prepareStatement(sql2);
+			verify.setBoolean(1, b.isVerified());
+			verify.setInt(2, b.getAccountId());
 			
-			new_user.executeQuery();
+			verify.executeQuery();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

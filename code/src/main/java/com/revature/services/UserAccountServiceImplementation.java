@@ -44,6 +44,11 @@ public class UserAccountServiceImplementation implements UserAccountService {
 			}
 		}
 		
+		if(usernameMatch == null) {
+			System.out.println("User not found");
+			return null;
+		}
+		
 		if(usernameMatch.getPassword().equals(password)){
 			e720Logger.info(username + " logged in.");
 			return usernameMatch;
@@ -80,8 +85,7 @@ public class UserAccountServiceImplementation implements UserAccountService {
 
 	@Override
 	public void createCustomerAccount(String username, String password) {
-		// TODO Auto-generated method stub
-		
+		ad.saveNewLoginInfo(username, password);
 	}
 
 	@Override

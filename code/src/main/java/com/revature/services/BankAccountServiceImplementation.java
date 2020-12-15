@@ -50,12 +50,19 @@ public class BankAccountServiceImplementation implements BankAccountService {
 
 	@Override
 	public double makeDeposit(int accountId, double amount) {
+		if(amount <= 0) {
+			System.out.println("Invalid transaction.");
+			return 0;
+		}
+		
+		Logger e720Logger = LogManager.getLogger("com.revature.e720");
 		List<BankAccount> allAccounts = ad.getAllBankAccounts();
 		
 		for(BankAccount b : allAccounts) {
 			if(b.getAccountId() == accountId) {
 				b.deposit(b.getBalance() + amount);
 				ad.updateBankAccountInfo(b);
+				e720Logger.info("Deposited $" + amount + " into account#" + accountId);
 				return b.getBalance();
 			}
 		}
@@ -65,17 +72,24 @@ public class BankAccountServiceImplementation implements BankAccountService {
 
 	@Override
 	public double makeWithdrawal(int accountId, double amount) {
+		if(amount <= 0) {
+			System.out.println("Invalid transaction.");
+			return 0;
+		}
+		Logger e720Logger = LogManager.getLogger("com.revature.e720");
 		List<BankAccount> allAccounts = ad.getAllBankAccounts();
 		
 		for(BankAccount b : allAccounts) {
 			if(b.getAccountId() == accountId) {
 				double result = b.withdraw(b.getBalance() + amount);
 				ad.updateBankAccountInfo(b);
+				e720Logger.info("Withdrew $" + amount + " from account#" + accountId);
 				return result;
 				/*
 				 * This may not allow you to withdraw the full amount, depending on your
 				 * balance.
 				 */
+				
 			}
 		}
 		
@@ -99,7 +113,10 @@ public class BankAccountServiceImplementation implements BankAccountService {
 
 	@Override
 	public void createMoneyTransfer(MoneyTransfer mt) {
+		Logger e720Logger = LogManager.getLogger("com.revature.e720");
 		ad.createMoneyTransfer(mt);
+		e720Logger.info("New money transfer from User#" + mt.getOrigin()
+		+ " to User#" + mt.getTarget() + " of amount $" + mt.getSum());
 	}
 
 	@Override
@@ -133,14 +150,15 @@ public class BankAccountServiceImplementation implements BankAccountService {
 	}
 
 	@Override
-	public void updateAccount(int accountId) {
-		List<BankAccount> allAccounts = ad.getAllBankAccounts();
-		
-		for(BankAccount b : allAccounts) {
-			if(b.getAccountId() == accountId) {
-				ad.updateBankAccountInfo(b);
-			}
-		}
+	public void updateAccount(BankAccount b) {
+		ad.updateBankAccountInfo(b);
+//		List<BankAccount> allAccounts = ad.getAllBankAccounts();
+//		
+//		for(BankAccount b : allAccounts) {
+//			if(b.getAccountId() == accountId) {
+//				ad.updateBankAccountInfo(b);
+//			}
+//		}
 		
 	}
 

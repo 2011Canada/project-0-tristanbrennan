@@ -1,5 +1,8 @@
 package com.revature.menu;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -33,7 +36,7 @@ public class BankMenu {
 			
 			
 			if(mode == 0) {
-				activeUser = loginPrompt();
+				frontPrompt();
 			}
 			else if(mode == 1) {
 				userAccountDashboard();
@@ -42,6 +45,29 @@ public class BankMenu {
 			
 		}
 		//end of loop
+	}
+	
+	public void frontPrompt() {
+		System.out.println("To login as an existing user, enter <login>");
+		System.out.println("To create a new account, enter <new>");
+		
+		String userInput = manageUserInput();
+		
+		if(userInput.equals("login")) {
+			activeUser = loginPrompt();
+		}
+		else if(userInput.equals("new")) {
+			createPrompt();
+			beginMenuLoop();
+		}
+	}
+	
+	public void createPrompt() {
+		System.out.println("Enter new username:");
+		String u = manageUserInput();
+		System.out.println("Enter new password:");
+		String p = manageUserInput();
+		uas.createCustomerAccount(u, p);
 	}
 	
 	public UserAccount loginPrompt() {
@@ -111,7 +137,7 @@ public class BankMenu {
 		As a customer, I can accept a money transfer from another account.
 		2 points
 		 */
-		
+		System.out.println("#######################");
 		System.out.println("Welcome to the Customer Account Dashboard.");
 		System.out.println("Your User ID is # " + activeUser.getUserId());
 		
@@ -166,6 +192,10 @@ public class BankMenu {
 				}
 				 System.out.println("Accepted all transfers.");
 			 }
+			 else if(splitCommand[0].equals("logout")) {
+				 activeUser = null;
+				 beginMenuLoop();
+			 }
 		 }
 		 else if(splitCommand.length == 2) {
 			 if(splitCommand[0].equals("accept")) {
@@ -193,12 +223,12 @@ public class BankMenu {
 				 int id = Integer.parseInt((splitCommand[1]));
 				 
 				 if(splitCommand[0].equals("withdraw")) {
-					 System.out.println("Withdrew $" + val);
 					 bas.makeWithdrawal(id, val);
+					 if(val > 0) System.out.println("Withdrew $" + val);
 				 }
 				 else if(splitCommand[0].equals("deposit")) {
-					 System.out.println("Deposited $" + val);
 					 bas.makeDeposit(id, val);
+					 if(val > 0) System.out.println("Deposited $" + val);
 				 }
 			 }
 		 else if(splitCommand.length == 4) {
@@ -231,7 +261,7 @@ public class BankMenu {
 		A an employee, I can view a log of all transactions.
 		2 points
 		 */
-		
+		System.out.println("#######################");
 		System.out.println("Enter one of the following commands:");
 		System.out.println("To approve all accounts, enter <approve>:");
 		System.out.println("To approve a single account, enter <approve> followed by the id of the account:");
@@ -270,9 +300,30 @@ public class BankMenu {
 			 if(splitCommand[0].equals("approve")) {
 				 for(BankAccount b : unverifiedAccounts) {
 					 b.setVerified(true);
-					bas.updateAccount(b.getAccountId());
+					bas.updateAccount(b);
 				}
 				 System.out.println("Approved all accounts.");
+			 }
+			 else if(splitCommand[0].equals("log")) {
+				 BufferedReader in;
+				try {
+					in = new BufferedReader(new FileReader("trace.log"));
+					
+					while (in.readLine() != null) {
+					       System.out.println(in.readLine());          
+					 }    
+					
+					in.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} 
+				      
+				 
+			 }
+			 else if(splitCommand[0].equals("logout")) {
+				 activeUser = null;
+				 beginMenuLoop();
 			 }
 		 }
 		 else if(splitCommand.length == 2) {
@@ -286,8 +337,8 @@ public class BankMenu {
 				}
 			 else if(splitCommand[0].equals("approve")) {
 				 int id = Integer.parseInt(splitCommand[1]);
-				 bas.getBankAccountById(id);
-				 bas.updateAccount(id);
+				 bas.getBankAccountById(id).setVerified(true);
+				 //bas.updateAccount();
 				 System.out.println("Approved accounts#" + id);
 			 }
 		 }
@@ -298,18 +349,18 @@ public class BankMenu {
 		
 		//see all accounts
 		
-		boolean eventsAwaitApproval = false;
-		
-		if(eventsAwaitApproval) {
-			System.out.println("Here is a list of accounts that require your approval:");
-			/*
-			 * Creation of employee accounts requires approval.
-			 * Creation of customer accounts only requires approval if the starting balance > 0.
-			 */
-		}
-		else {
-			System.out.println("No accounts require your approval.");
-		}
+//		boolean eventsAwaitApproval = false;
+//		
+//		if(eventsAwaitApproval) {
+//			System.out.println("Here is a list of accounts that require your approval:");
+//			/*
+//			 * Creation of employee accounts requires approval.
+//			 * Creation of customer accounts only requires approval if the starting balance > 0.
+//			 */
+//		}
+//		else {
+//			System.out.println("No accounts require your approval.");
+//		}
 		
 	}
 	
